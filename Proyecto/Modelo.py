@@ -14,7 +14,6 @@ from sklearn.metrics import (
     r2_score
 )
 
-# 1) Carga datos
 df = pd.read_csv('Proyecto/dataset_exito_binario.csv')
 features = [
     'LONGITUD_NUM','LATITUD_NUM',
@@ -25,7 +24,6 @@ df = df.dropna(subset=['Exito'])
 X = df[features]
 y = df['Exito']
 
-# 2) Define preprocesamiento
 num_feats = ['LONGITUD_NUM','LATITUD_NUM','MTS2VENTAS_NUM', 'exito_binario']
 cat_feats = ['ENTORNO_DES','NIVELSOCIOECONOMICO_DES','LID_UBICACION_TIENDA']
 
@@ -34,7 +32,6 @@ preprocessor = ColumnTransformer([
     ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), cat_feats)
 ])
 
-# 3) Pipelines y grids
 pipelines = {
     'SVR': Pipeline([('pp', preprocessor), ('model', SVR())]),
     'RF':  Pipeline([('pp', preprocessor), ('model', RandomForestRegressor(random_state=42))])
@@ -53,19 +50,17 @@ param_grids = {
     }
 }
 
-# 4) Métricas
 scorers = {
     'R2': make_scorer(r2_score),
     'neg_MSE': make_scorer(mean_squared_error, greater_is_better=False)
 }
 
-# 5) Grid search
 best_estimators = {}
 for name in pipelines:
     grid = GridSearchCV(
         pipelines[name],
         param_grids[name],
-        scoring='r2',     # puedes cambiar a 'neg_mean_squared_error' si prefieres
+        scoring='r2',   
         cv=5,
         n_jobs=-1,
         verbose=1
@@ -75,7 +70,6 @@ for name in pipelines:
     print(f"\n{name} ➞ Mejores params: {grid.best_params_}")
     print(f"        Mejor R² (CV): {grid.best_score_:.4f}")
 
-# 6) Evaluación final en un hold-out (opcional)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, random_state=42, test_size=0.1
 )
@@ -88,7 +82,6 @@ for name, est in best_estimators.items():
     print(f"\n{name} — R² en test: {r2:.4f},  MAE: {mae:.2f},  RMSE: {rmse:.2f}")
 
 
-# Guardar el mejor modelo (según R² en validación cruzada)
 mejor_modelo = max(best_estimators.items(), key=lambda x: x[1].score(X_test, y_test))[1]
 joblib.dump(best_estimators['RF'], 'modelo_rf_regresion.pkl')
 print("\n✅ Mejor modelo de regresión guardado como 'mejor_modelo_regresion.pkl'")

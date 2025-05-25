@@ -7,10 +7,8 @@ from streamlit_folium import st_folium
 import requests
 import joblib
 
-# Configuración inicial
 st.set_page_config(page_title="Ubicaciones", layout="centered")
 
-# Estilos personalizados
 st.markdown("""
     <style>
     html, body, .stApp {
@@ -64,7 +62,6 @@ st.markdown("""
     <hr style="border: 1px solid #444;">
 """, unsafe_allow_html=True)
 
-# Diccionario de nivel socioeconómico
 escala_color = {
     "muy alto": "🔴 Nivel E",
     "alto": "🟠 Nivel D",
@@ -100,7 +97,6 @@ def obtener_lugar_desde_coordenadas(lat, lon):
     except Exception as e:
         return None, f"Error: {e}"
 
-# Sección de inputs
 st.subheader("Da click en el mapa o ingresa las coordenadas manualmente")
 col1, col2 = st.columns(2)
 
@@ -220,7 +216,6 @@ with st.expander("ℹ️ Cómo usar esta aplicación"):
 st.markdown("---")
 st.subheader("🔎 Información Adicional")
 
-# Mostrar dos imágenes en columnas
 col1, col2 = st.columns(2)
 
 with col1:
