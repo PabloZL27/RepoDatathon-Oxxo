@@ -1,4 +1,5 @@
 import pandas as pd
+import joblib
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -14,19 +15,19 @@ from sklearn.metrics import (
 )
 
 # 1) Carga datos
-df = pd.read_csv('Proyecto/DIM_TIENDA_Con_Exito.csv')
+df = pd.read_csv('Proyecto/dataset_exito_binario.csv')
 features = [
     'LONGITUD_NUM','LATITUD_NUM',
     'ENTORNO_DES','MTS2VENTAS_NUM',
-    'NIVELSOCIOECONOMICO_DES',
-    'PLAZA_CVE','LID_UBICACION_TIENDA'
+    'NIVELSOCIOECONOMICO_DES','LID_UBICACION_TIENDA', 'exito_binario'
 ]
+df = df.dropna(subset=['Exito'])
 X = df[features]
 y = df['Exito']
 
 # 2) Define preprocesamiento
-num_feats = ['LONGITUD_NUM','LATITUD_NUM','MTS2VENTAS_NUM']
-cat_feats = ['ENTORNO_DES','NIVELSOCIOECONOMICO_DES','PLAZA_CVE','LID_UBICACION_TIENDA']
+num_feats = ['LONGITUD_NUM','LATITUD_NUM','MTS2VENTAS_NUM', 'exito_binario']
+cat_feats = ['ENTORNO_DES','NIVELSOCIOECONOMICO_DES','LID_UBICACION_TIENDA']
 
 preprocessor = ColumnTransformer([
     ('num', StandardScaler(), num_feats),
@@ -76,7 +77,7 @@ for name in pipelines:
 
 # 6) Evaluación final en un hold-out (opcional)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, random_state=42, test_size=0.2
+    X, y, random_state=42, test_size=0.1
 )
 
 for name, est in best_estimators.items():
@@ -85,3 +86,10 @@ for name, est in best_estimators.items():
     mae  = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     print(f"\n{name} — R² en test: {r2:.4f},  MAE: {mae:.2f},  RMSE: {rmse:.2f}")
+
+
+# Guardar el mejor modelo (según R² en validación cruzada)
+mejor_modelo = max(best_estimators.items(), key=lambda x: x[1].score(X_test, y_test))[1]
+joblib.dump(best_estimators['RF'], 'modelo_rf_regresion.pkl')
+print("\n✅ Mejor modelo de regresión guardado como 'mejor_modelo_regresion.pkl'")
+
