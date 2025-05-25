@@ -11,7 +11,7 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from imblearn.over_sampling import SMOTE
 
 # 1. Cargar dataset
-df = pd.read_csv('Proyecto/dataset_exito_binario.csv')
+df = pd.read_csv('/Users/bryanmeza/Projects/RepositoriosGitHub/RepoDatathon-Oxxo/Proyecto/dataset_exito_binario.csv')
 
 features = [
     'LONGITUD_NUM','LATITUD_NUM',
