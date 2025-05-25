@@ -4,18 +4,89 @@ from geopy.geocoders import Nominatim
 from difflib import get_close_matches
 import folium
 from streamlit_folium import st_folium
+import requests
 
 # Configuración inicial
 st.set_page_config(page_title="Ubicaciones", layout="centered")
-st.title("🗺️ Ubicación y Datos Demográficos")
+
+# Estilos personalizados
+st.markdown("""
+    <style>
+    /* Fondo oscuro general */
+    html, body, .stApp {
+        background-color: #0e1117 !important;
+        color: #ffffff !important;
+        font-size: 18px !important;
+    }
+    
+    .block-container {
+        max-width: 95% !important;
+        padding-left: 10rem !important;  /* Padding izquierdo */
+        padding-right: 10rem !important; /* Padding derecho */
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Contenedor principal con mayor ancho y espaciado */
+    .block-container {
+        max-width: 95% !important;
+        padding: 2rem 3rem;
+    }
+
+    /* Input oscuro */
+    .stTextInput > div > div > input,
+    .stSelectbox > div,
+    .stNumberInput > div {
+        background-color: #262730;
+        color: white;
+        border-radius: 5px;
+        font-size: 16px !important;
+    }
+
+    /* Botón con animación y color */
+    .stButton > button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        font-size: 16px !important;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .stButton > button:hover {
+        color: white;
+        background-color: #45a049;
+        transform: scale(1.03);
+    }
+
+    /* Título separado del navbar */
+    .stApp h1 {
+        margin-top: 3rem !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
+st.markdown("""
+    <div style="text-align: center; font-size: 48px; color: white; font-weight: bold; margin-top: 40px;">
+        🗺️ <b>OXXO GeoInsights</b>
+    </div>
+    <div style="text-align: center; font-size: 28px; color: #cccccc; margin-bottom: 20px;">
+        🌍 Explorador Geográfico de Nivel Socioeconómico
+    </div>
+    <hr style="border: 1px solid #444;">
+""", unsafe_allow_html=True)
 
 # Diccionario de nivel socioeconómico
 escala_color = {
-    "muy alto": "🔴 Nivel E (muy alta marginación)",
-    "alto": "🔴 Nivel D (alta marginación)",
-    "medio": "🟠 Nivel C (media marginación)",
-    "bajo": "🟡 Nivel B (baja marginación)",
-    "muy bajo": "🟢 Nivel A (muy baja marginación)"
+    "muy alto": "🔴 Nivel E",
+    "alto": "🟠 Nivel D",
+    "medio": "🟠 Nivel C",
+    "bajo": "🟡 Nivel B",
+    "muy bajo": "🟢 Nivel A"
 }
 
 # Cargar Excel de nivel socioeconómico
@@ -59,6 +130,10 @@ with col1:
     lat_manual = st.text_input("Latitud", placeholder="Ejemplo: 25.6714")
     lon_manual = st.text_input("Longitud", placeholder="Ejemplo: -100.3090")
     boton_manual = st.button("Buscar con coordenadas ingresadas")
+
+    st.markdown("### 📌 Información adicional")
+    tipo_entorno = st.selectbox("Tipo de entorno", ["Urbano", "Suburbano", "Rural"])
+    metros_cuadrados = st.number_input("Tamaño del terreno (m²)", min_value=0, step=1)
 
 # Mapa interactivo
 with col2:
@@ -113,3 +188,23 @@ if lat is not None and lon is not None:
         st.error(f"❌ {descripcion}")
 else:
     st.info("Haz clic en el mapa o ingresa las coordenadas manualmente para consultar.")
+
+if lat and lon:
+    folium.Marker([lat, lon], popup="Ubicación seleccionada").add_to(m)
+    folium.Circle([lat, lon], radius=poblacion_cercana * 1000, color="blue", fill=True).add_to(m)
+
+def obtener_competencia(lat, lon):
+    # Ejemplo con Google Places API
+    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius=5000&type=store&key=YOUR_API_KEY"
+    response = requests.get(url)
+    return response.json()
+
+competencia = obtener_competencia(lat, lon)
+st.write("Negocios cercanos:", competencia)
+
+with st.expander("ℹ️ Cómo usar esta aplicación"):
+    st.write("""
+        1. Selecciona una ubicación en el mapa o ingresa las coordenadas manualmente.
+        2. Proporciona información adicional como tipo de entorno y tamaño del terreno.
+        3. Consulta el potencial de éxito y otros datos relevantes.
+    """)
