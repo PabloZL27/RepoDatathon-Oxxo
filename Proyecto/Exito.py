@@ -41,3 +41,5 @@ output_path = os.path.join(script_dir, 'DIM_TIENDA_Con_Exito.csv')
 df_final.to_csv(output_path, index=False)
 
 print(" Generado 'DIM_TIENDA_Con_Exito.csv' con la columna Exito.")
+
+
