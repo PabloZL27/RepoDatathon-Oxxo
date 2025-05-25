@@ -69,7 +69,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
 st.markdown("""
     <div style="text-align: center; font-size: 48px; color: white; font-weight: bold; margin-top: 40px;">
         🗺️ <b>OXXO GeoInsights</b>
@@ -119,7 +118,7 @@ def obtener_lugar_desde_coordenadas(lat, lon):
         return None, f"Error: {e}"
 
 # Mapa centrado en Nuevo León
-st.subheader("Da clic en el mapa o ingresa las coordenadas manualmente")
+st.subheader("Da click en el mapa o ingresa las coordenadas manualmente")
 
 # Crear columnas para dividir el espacio
 col1, col2 = st.columns(2)
@@ -192,15 +191,6 @@ else:
 if lat and lon:
     folium.Marker([lat, lon], popup="Ubicación seleccionada").add_to(m)
     folium.Circle([lat, lon], radius=poblacion_cercana * 1000, color="blue", fill=True).add_to(m)
-
-def obtener_competencia(lat, lon):
-    # Ejemplo con Google Places API
-    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius=5000&type=store&key=YOUR_API_KEY"
-    response = requests.get(url)
-    return response.json()
-
-competencia = obtener_competencia(lat, lon)
-st.write("Negocios cercanos:", competencia)
 
 with st.expander("ℹ️ Cómo usar esta aplicación"):
     st.write("""
