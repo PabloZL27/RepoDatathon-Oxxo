@@ -1,18 +1,40 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Título de la app
-st.title("📊 Visualización de Datos")
+st.title("Consulta de Nivel Socioeconómico en Nuevo León")
 
-# Carga de datos
-st.subheader("Datos cargados")
-df = pd.read_csv("../Datos/DIM_TIENDA_TEST.csv")  # Reemplaza por tu archivo
-st.dataframe(df)
+# Cargar el archivo Excel
+@st.cache_data
+def cargar_datos():
+    df = pd.read_excel("NivelSocioEconomicoNL.xlsx")
+    df["Nombre del municipio"] = df["Nombre del municipio"].str.strip().str.lower()
+    return df
 
-# Gráfica simple
-st.subheader("Gráfico de barras")
-columna = st.selectbox("Selecciona una columna numérica", df.select_dtypes(include='number').columns)
-fig, ax = plt.subplots()
-df[columna].value_counts().plot(kind='bar', ax=ax)
-st.pyplot(fig)
+df = cargar_datos()
+
+# Diccionario visual
+escala_color = {
+    "muy alto": "🔴 Nivel E",
+    "alto": "🔴 Nivel D",
+    "medio": "🟠 Nivel C",
+    "bajo": "🟡 Nivel B",
+    "muy bajo": "🟢 Nivel A"
+}
+
+# Input del usuario
+municipio_input = st.text_input("Ingresa el nombre del municipio de Nuevo León:")
+
+if municipio_input:
+    municipio = municipio_input.strip().lower()
+    resultado = df[df["Nombre del municipio"] == municipio]
+
+    if not resultado.empty:
+        grado_raw = resultado.iloc[0]["Grado de marginación, 2020"]
+        grado = grado_raw.strip().lower()
+        visual = escala_color.get(grado, grado_raw)
+
+        st.success(f"📍 **Municipio:** {municipio.title()}")
+        st.markdown(f"🏷️ **Nivel socioeconómico:** {visual}")
+    else:
+        st.error("❌ Municipio no encontrado.")
